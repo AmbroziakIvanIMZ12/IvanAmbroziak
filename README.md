@@ -1,4 +1,7 @@
-You need the Branch: seminar4, wich located near "New pull request"
-1.Then you need folder: SOAP
-2.Then you need folder: com
-3.Then you need: SOAP implementation located in folder SOAP, than class Main; Server SOAP located in folder lpi/server/soap
+Following the steps:
+
+1.  You need the Branch: Seminar4
+2. Then you need open folder: SOAP
+3. Then folder: com
+4. Then : SOAP implementation located in folder SOAP, than class Main;
+	              Server SOAP located in folder lpi/server/soap
