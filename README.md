@@ -1,5 +1,4 @@
-You need the Branch: Seminar03, wich located near "New pull request"
-Then you need folder: RMI
-Then you need folder: src
-Then you need folder: SemRMI
-Then you need the files: Main; Some_Imp
+You need the Branch: Seminar04, wich located near "New pull request"
+Then you need folder: SOAP
+Then you need folder: com
+Then you need: SOAP implementation located in folder SOAP, than class Main; Server SOAP located in folder lpi/server/soap

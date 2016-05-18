@@ -1,4 +1,4 @@
-package lpi.server.rmi;
+package com.lpi.server.soap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,27 +6,32 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
+import javax.jws.soap.SOAPBinding.Style;
+import javax.jws.soap.SOAPBinding.Use;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.ws.WebFault;
 
 /**
- * @author RST Defines the operations provided by the server.
+ * Defines the operations provided by the server.
+ * @author RST 
  */
-public interface IServer extends Remote {
-
-	/**
-	 * The name of the server remote object in the server's registry.
-	 */
-	public static final String RMI_SERVER_NAME = "lpi.server.rmi";
+@WebService(name = "IChatServer", serviceName="ChatServer", portName="ChatServerProxy")
+@SOAPBinding(style = Style.DOCUMENT, use=Use.LITERAL)
+public interface IServer {
 
 	/**
 	 * Simplest method that does not accept any parameters and does not return
 	 * any result. The easiest way to ensure everything works as expected.
-	 * 
-	 * @throws RemoteException
-	 *             in case of communication issues.
 	 */
-	public void ping() throws RemoteException;
+	@WebMethod
+	public void ping();
 
 	/**
 	 * Next method to test client-server communication and parameter passing.
@@ -34,10 +39,9 @@ public interface IServer extends Remote {
 	 * @param text
 	 *            Any text you want to send to the server.
 	 * @return The text you sent prepended with the "ECHO:".
-	 * @throws RemoteException
-	 *             in case of communication issues.
 	 */
-	public String echo(String text) throws RemoteException;
+	@WebMethod
+	public String echo(@WebParam(name="text") String text);
 
 	/**
 	 * Allows logging in the user.
@@ -47,19 +51,9 @@ public interface IServer extends Remote {
 	 * @param password
 	 *            The password of the user.
 	 * @return The session id that should be used in the consequent calls.
-	 * @throws RemoteException
-	 *             in case of communication issues.
-	 * @throws LoginException
-	 *             if the provided password does not match to the login that was
-	 *             already provided before.
-	 * @throws ArgumentException
-	 *             if the specified <b>login</b> or <b>password</b> are not
-	 *             valid.
-	 * @throws ServerException
-	 *             if the server failed to process the request.
 	 */
-	public String login(String login, String password)
-			throws RemoteException, LoginException, ArgumentException, ServerException;
+	@WebMethod
+	public String login(@WebParam(name="login") String login, @WebParam(name="password") String password) throws LoginException, ArgumentException, ServerException;
 
 	/**
 	 * Provides a list of users currently active on the server.
@@ -67,14 +61,9 @@ public interface IServer extends Remote {
 	 * @param sessionId
 	 *            The session id assigned to you after <b>login</b> call.
 	 * @return An array of user names.
-	 * @throws RemoteException
-	 *             in case of communication issues.
-	 * @throws ArgumentException
-	 *             if the specified <b>sessionId</b> is not valid.
-	 * @throws ServerException
-	 *             if the server failed to process the request.
 	 */
-	public String[] listUsers(String sessionId) throws RemoteException, ArgumentException, ServerException;
+	@WebMethod
+	public String[] listUsers(@WebParam(name="sessionId") String sessionId) throws ArgumentException, ServerException;
 
 	/**
 	 * Sends the message to the user, registered on the server.
@@ -83,15 +72,9 @@ public interface IServer extends Remote {
 	 *            The session id assigned to you after <b>login</b> call.
 	 * @param msg
 	 *            An message object that contains message information.
-	 * @throws RemoteException
-	 *             in case of communication issues.
-	 * @throws ArgumentException
-	 *             if the specified <b>sessionId</b> or <b>msg</b> are not
-	 *             valid.
-	 * @throws ServerException
-	 *             if the server failed to process the request.
 	 */
-	public void sendMessage(String sessionId, Message msg) throws RemoteException, ArgumentException, ServerException;
+	@WebMethod
+	public void sendMessage(@WebParam(name="sessionId") String sessionId, @WebParam(name="message") Message msg) throws ArgumentException, ServerException;
 
 	/**
 	 * Receives a message if there are any pending messages addressed to the
@@ -100,14 +83,9 @@ public interface IServer extends Remote {
 	 * @param sessionId
 	 *            The session id assigned to you after <b>login</b> call.
 	 * @return A message object or <b>null</b> if there are no pending messages.
-	 * @throws RemoteException
-	 *             in case of communication issues.
-	 * @throws ArgumentException
-	 *             if the specified <b>sessionId</b> is not valid.
-	 * @throws ServerException
-	 *             if the server failed to process the request.
 	 */
-	public Message receiveMessage(String sessionId) throws RemoteException, ArgumentException, ServerException;
+	@WebMethod
+	public Message receiveMessage(@WebParam(name="sessionId") String sessionId) throws ArgumentException, ServerException;
 
 	/**
 	 * Sends the file to the user, registered on the server.
@@ -116,15 +94,9 @@ public interface IServer extends Remote {
 	 *            The session id assigned to you after <b>login</b> call.
 	 * @param file
 	 *            The file information that should be delivered to the receiver.
-	 * @throws RemoteException
-	 *             in case of communication issues.
-	 * @throws ArgumentException
-	 *             if the specified <b>sessionId</b> or <b>file</b> are not
-	 *             valid.
-	 * @throws ServerException
-	 *             if the server failed to process the request.
 	 */
-	public void sendFile(String sessionId, FileInfo file) throws RemoteException, ArgumentException, ServerException;
+	@WebMethod
+	public void sendFile(@WebParam(name="sessionId") String sessionId, @WebParam(name="file") FileInfo file) throws ArgumentException, ServerException;
 
 	/**
 	 * Receives a file if there are any pending files addressed to the logged in
@@ -134,33 +106,25 @@ public interface IServer extends Remote {
 	 *            The session id assigned to you after <b>login</b> call.
 	 * @return A file info object describing the file targeted to a user,
 	 *         registered on the server.
-	 * @throws RemoteException
-	 *             in case of communication issues.
-	 * @throws ArgumentException
-	 *             if the specified <b>sessionId</b> is not valid.
-	 * @throws ServerException
-	 *             if the server failed to process the request.
 	 */
-	public FileInfo receiveFile(String sessionId) throws RemoteException, ArgumentException, ServerException;
+	@WebMethod
+	public FileInfo receiveFile(@WebParam(name="sessionId") String sessionId) throws ArgumentException, ServerException;
 
 	/**
 	 * Logs out the user, specified by the session id and disposes the session.
 	 * 
 	 * @param sessionId
 	 *            The session id assigned to you after <b>login</b> call.
-	 * @throws RemoteException
-	 *             in case of communication issues.
-	 * @throws ArgumentException
-	 *             if the specified <b>sessionId</b> is not valid.
-	 * @throws ServerException
-	 *             if the server failed to process the request.
 	 */
-	public void exit(String sessionId) throws RemoteException, ArgumentException, ServerException;
+	@WebMethod
+	public void exit(@WebParam(name="sessionId") String sessionId) throws ArgumentException, ServerException;
 
 	/**
 	 * @author RST The class that describes the textual message that should be
 	 *         delivered to some user.
 	 */
+	@XmlRootElement
+	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class Message implements Serializable {
 		private static final long serialVersionUID = -2358472729391550082L;
 
@@ -272,9 +236,11 @@ public interface IServer extends Remote {
 	}
 
 	/**
-	 * @author RST The class that describes a file that should be transferred to
-	 *         some user.
+	 * The class that describes a file that should be transferred to some user.
+	 * @author RST 
 	 */
+	@XmlRootElement
+	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class FileInfo implements Serializable {
 		private static final long serialVersionUID = 8407920676195680991L;
 
@@ -462,10 +428,11 @@ public interface IServer extends Remote {
 	}
 
 	/**
-	 * @author RST The class that describes a server-side error that occurred
-	 *         during request processing.
+	 * The class that describes a server-side error that occurred during request processing.
+	 * @author RST 
 	 */
-	public static class ServerException extends RemoteException {
+	@WebFault(messageName="ServerFault", name = "ServerFault")
+	public static class ServerException extends Exception {
 		private static final long serialVersionUID = 2592458695363000913L;
 
 		public ServerException() {
@@ -482,9 +449,11 @@ public interface IServer extends Remote {
 	}
 
 	/**
-	 * @author RST The class that describes the login error that occurred.
+	 * The class that describes the login error that occurred.
+	 * @author RST 
 	 */
-	public static class LoginException extends RemoteException {
+	@WebFault(messageName="LoginFault", name = "LoginFault")
+	public static class LoginException extends Exception {
 		private static final long serialVersionUID = -5682573656536628713L;
 
 		public LoginException() {
@@ -501,10 +470,11 @@ public interface IServer extends Remote {
 	}
 
 	/**
-	 * @author RST The class that describes an issue with the provided
-	 *         arguments.
+	 * The class that describes an issue with the provided arguments.
+	 * @author RST 
 	 */
-	public static class ArgumentException extends RemoteException {
+	@WebFault(messageName="ArgumentFault", name = "ArgumentFault")
+	public static class ArgumentException extends Exception {
 		private static final long serialVersionUID = 8404607085051949404L;
 
 		private String argumentName;
